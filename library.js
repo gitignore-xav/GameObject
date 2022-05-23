@@ -455,7 +455,8 @@ class Player extends GameObject {
             // [ ] particles
             // [ ] Restart after x amount of time
 
-            //this.destroy();
+			GameManager.main.killPlayer();
+            this.destroy();
         });
     }
 
@@ -903,6 +904,50 @@ class GameManager extends GameObject {
 
         this.points++;
     }
+
+	killPlayer() {
+		// [ ] Inform player of their death
+
+		World.objects.filter(o => o instanceof Spawner).forEach(o => o.started = false);
+		
+		this.lives--;
+		if(this.lives <= 0) {
+			return;
+		}
+		
+		setTimeout(() => {
+			Input.keys.clear();
+			Input.pressed.clear();
+			Input.released.clear();
+
+			World.objects.filter(o => o instanceof Saw).forEach(o => o.destroy());
+			
+			World.instantiate(new Player(350, 270));
+		}, 500);
+	}
+
+	update() {
+		if(this.lives <= 0) {
+			// TODO Allow the player to restart by pressing "R"
+			if(Input.pressed.get("r")) {
+				World.loadScene("Game");
+			}
+		}
+	}
+
+	draw() {
+		const ctx = Drawing.ctx;
+		
+		ctx.fillStyle = "#000000";
+		ctx.fillText("Points: " + this.points, 20, 20);
+		ctx.fillText("Lives: " + this.lives, 20, 40);
+
+		if(this.lives <= 0) {
+			// TODO Make this better
+			ctx.fillText("Game Over", 240, 240);
+			ctx.fillText("Press \"R\" to Restart", 240, 260);
+		}
+	}
 
     // TODO Display
     // [ ] Show Points
